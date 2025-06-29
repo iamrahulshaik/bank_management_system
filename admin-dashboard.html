@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <style>
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    <h2>👋 Welcome Admin</h2>
+
+    <!-- All Accounts Section -->
+    <div class="section">
+      <h3>📋 All Accounts</h3>
+      <button onclick="getAllAccounts()">🔄 Show All Accounts</button>
+      <ul id="accountList" class="hidden"></ul>
+    </div>
+
+    <!-- Account Details Section -->
+    <div class="section">
+      <h3>🔍 View Account Details</h3>
+      <input type="text" id="acSearchInput" placeholder="Enter Account Number">
+      <button onclick="getAccountDetails()">🔍 Search</button>
+      <pre id="accountDetails"></pre>
+    </div>
+
+    <!-- Transactions by Date Section -->
+    <div class="section">
+      <h3>🗓️ Transactions by Date</h3>
+      <input type="date" id="txnDateInput">
+      <button onclick="getTransactionsByDate()">📜 View</button>
+      <ul id="txnByDateList"></ul>
+    </div>
+
+    <!-- Transactions of Specific Account -->
+    <div class="section">
+      <h3>📒 Transactions of Specific Account</h3>
+      <input type="text" id="txnAcInput" placeholder="Enter Account Number">
+      <button onclick="getTransactionsByAccount()">📋 Fetch Transactions</button>
+      <ul id="txnByAcList"></ul>
+    </div>
+
+    <!-- Logout -->
+    <div class="section">
+      <button onclick="logout()">🚪 Logout</button>
+    </div>
+  </div>
+
+  <script>
+    function logout() {
+      sessionStorage.clear();
+      window.location.href = "/";
+    }
+
+    async function getAllAccounts() {
+      const res = await fetch("/admin/accounts");
+      const data = await res.json();
+      const list = document.getElementById("accountList");
+      list.innerHTML = ""; // Clear previous list
+      list.classList.remove("hidden"); // Show the list
+
+      if (data.length === 0) {
+        const li = document.createElement("li");
+        li.innerText = "No accounts found.";
+        list.appendChild(li);
+      } else {
+        data.forEach(acc => {
+          const li = document.createElement("li");
+          li.innerText = `${acc.name} (Ac No: ${acc.ac_number}) 💰 ₹${acc.amount}`;
+          list.appendChild(li);
+        });
+      }
+    }
+
+    async function getAccountDetails() {
+      const acNumber = document.getElementById("acSearchInput").value;
+      if (!acNumber) return alert("Please enter an account number");
+      const res = await fetch(`/admin/account/${acNumber}`);
+      const data = await res.json();
+      const display = document.getElementById("accountDetails");
+      if (data.error) {
+        display.innerText = data.error;
+      } else {
+        display.innerText = `
+👤 Name: ${data.name}
+📞 Contact: ${data.contact}
+📍 Location: ${data.location}
+🏦 Account Type: ${data.ac_type}
+💰 Balance: ₹${data.amount}
+🔒 PIN: ${data.pin}
+🔢 Account Number: ${data.ac_number}
+        `;
+      }
+    }
+
+    async function getTransactionsByDate() {
+      const date = document.getElementById("txnDateInput").value;
+      if (!date) return alert("Please select a date");
+      const res = await fetch(`/admin/transactions/${date}`);
+      const data = await res.json();
+      const list = document.getElementById("txnByDateList");
+      list.innerHTML = "";
+      if (data.length === 0) {
+        const li = document.createElement("li");
+        li.innerText = "No transactions found on this date.";
+        list.appendChild(li);
+      } else {
+        data.forEach(txn => {
+          const li = document.createElement("li");
+          li.innerText = `[${txn.timestamp}] ${txn.ac_number} - ${txn.transaction_type.toUpperCase()} ₹${txn.amount} → ₹${txn.balance_after}`;
+          list.appendChild(li);
+        });
+      }
+    }
+
+    async function getTransactionsByAccount() {
+      const acNumber = document.getElementById("txnAcInput").value;
+      if (!acNumber) return alert("Please enter an account number");
+      const res = await fetch(`/transactions/${acNumber}`);
+      const data = await res.json();
+      const list = document.getElementById("txnByAcList");
+      list.innerHTML = "";
+
+      if (data.length === 0) {
+        const li = document.createElement("li");
+        li.innerText = "No transactions found for this account.";
+        list.appendChild(li);
+      } else {
+        data.forEach(txn => {
+          const li = document.createElement("li");
+          li.innerText = `[${txn.timestamp}] ${txn.transaction_type.toUpperCase()} ₹${txn.amount} → ₹${txn.balance_after}`;
+          list.appendChild(li);
+        });
+      }
+    }
+
+    // You can optionally load accounts automatically:
+    // window.onload = getAllAccounts;
+  </script>
+</body>
+</html>

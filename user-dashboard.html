@@ -1,0 +1,247 @@
+<!-- templates/user-dashboard.html -->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>User Dashboard</title>
+  <link rel="stylesheet" href="/static/style.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: url("/static/bg.png") no-repeat center center fixed;
+      background-size: cover;
+      color: #000000;
+    }
+
+    .dashboard {
+      max-width: 500px;
+      margin: 50px auto;
+      padding: 30px;
+      border-radius: 10px;
+      
+      backdrop-filter: blur(3px);
+    }
+
+    h1, h3 {
+      text-align: center;
+    }
+
+    .section {
+      margin-bottom: 25px;
+      padding: 20px;
+      
+      border-radius: 8px;
+      
+    }
+
+    input, button {
+      display: block;
+      width: 100%;
+      margin-top: 10px;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: none;
+    }
+
+    input {
+      background-color: #fff;
+      color: #000;
+    }
+
+    button {
+      background-color: #27ae60;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #1e8449;
+    }
+
+    #actionMessage, #pinMessage {
+      margin-top: 10px;
+      font-weight: bold;
+      color:blue;
+      text-align: center;
+    }
+
+    #txnList {
+      list-style: none;
+      padding: 0;
+      color: #000000;
+    }
+
+    #userDetailsSection, #pinSection {
+      display: none;
+    }
+
+    .btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    <h1>🏦 User Dashboard</h1>
+
+    <!-- Show/Hide User Details -->
+    <div class="section">
+      <button onclick="toggleUserDetails()" id="toggleUserBtn">Show User Details</button>
+      <div id="userDetailsSection">
+        <h3>👤 Your Account</h3>
+        <p><strong>Name:</strong> <span id="detailName"></span></p>
+        <p><strong>Account No:</strong> <span id="detailAcNo"></span></p>
+        <p><strong>Type:</strong> <span id="detailType"></span></p>
+        <p><strong>Contact:</strong> <span id="detailContact"></span></p>
+        <p><strong>Location:</strong> <span id="detailLocation"></span></p>
+        <p><strong>Balance:</strong> ₹<span id="detailAmount"></span></p>
+      </div>
+    </div>
+
+    <!-- Credit/Debit Section -->
+    <div class="section">
+      <h3>💰 Credit/Debit</h3>
+      <input type="number" id="amountInput" placeholder="Enter amount" />
+      <div class="btn-group">
+        <button onclick="credit()">Credit</button>
+        <button onclick="debit()">Debit</button>
+      </div>
+      <div id="actionMessage"></div>
+    </div>
+
+    <!-- View Transactions -->
+    <div class="section">
+      <h3>📜 Transactions</h3>
+      <button onclick="getTransactions()">View Transactions</button>
+      <ul id="txnList"></ul>
+    </div>
+
+    <!-- PIN Change -->
+    <div class="section">
+      <button onclick="togglePinSection()" id="togglePinBtn">Change PIN</button>
+      <div id="pinSection">
+        <input type="password" id="oldPinInput" placeholder="Enter Old PIN" />
+        <input type="password" id="newPinInput" placeholder="Enter New PIN" />
+        <button onclick="changePin()">Submit</button>
+        <div id="pinMessage"></div>
+      </div>
+    </div>
+
+    <!-- Logout -->
+    <div class="section">
+      <button onclick="logout()">🚪 Logout</button>
+    </div>
+  </div>
+
+  <script>
+    const user = JSON.parse(sessionStorage.getItem("user"));
+    let detailsVisible = false;
+
+    function toggleUserDetails() {
+      const section = document.getElementById("userDetailsSection");
+      const btn = document.getElementById("toggleUserBtn");
+      if (!detailsVisible) {
+        document.getElementById("detailName").innerText = user.name;
+        document.getElementById("detailAcNo").innerText = user.ac_number;
+        document.getElementById("detailType").innerText = user.ac_type;
+        document.getElementById("detailContact").innerText = user.contact;
+        document.getElementById("detailLocation").innerText = user.location;
+        document.getElementById("detailAmount").innerText = user.amount;
+        section.style.display = "block";
+        btn.innerText = "Hide User Details";
+        detailsVisible = true;
+      } else {
+        section.style.display = "none";
+        btn.innerText = "Show User Details";
+        detailsVisible = false;
+      }
+    }
+
+    async function credit() {
+      const amt = document.getElementById("amountInput").value.trim();
+      if (!amt) return;
+      const formData = new FormData();
+      formData.append("ac_number", user.ac_number);
+      formData.append("amount", amt);
+      const res = await fetch("/credit", { method: "POST", body: formData });
+      showMessage(await res.text());
+      document.getElementById("amountInput").value = "";
+    }
+
+    async function debit() {
+      const amt = document.getElementById("amountInput").value.trim();
+      if (!amt) return;
+      const formData = new FormData();
+      formData.append("ac_number", user.ac_number);
+      formData.append("amount", amt);
+      const res = await fetch("/debit", { method: "POST", body: formData });
+      showMessage(await res.text());
+      document.getElementById("amountInput").value = "";
+    }
+
+    function showMessage(msg) {
+      const el = document.getElementById("actionMessage");
+      el.innerText = msg;
+      setTimeout(() => el.innerText = "", 4000);
+    }
+
+    async function getTransactions() {
+      const res = await fetch(`/transactions/${user.ac_number}`);
+      const txns = await res.json();
+      const list = document.getElementById("txnList");
+      list.innerHTML = "";
+      txns.forEach(txn => {
+        const li = document.createElement("li");
+        li.innerText = `[${txn.timestamp}] ${txn.transaction_type.toUpperCase()} ₹${txn.amount} → ₹${txn.balance_after}`;
+        list.appendChild(li);
+      });
+    }
+
+    function togglePinSection() {
+      const section = document.getElementById("pinSection");
+      const btn = document.getElementById("togglePinBtn");
+      if (section.style.display === "none") {
+        section.style.display = "block";
+        btn.innerText = "Hide PIN Change";
+      } else {
+        section.style.display = "none";
+        btn.innerText = "Change PIN";
+      }
+    }
+
+    async function changePin() {
+      const oldPin = document.getElementById("oldPinInput").value.trim();
+      const newPin = document.getElementById("newPinInput").value.trim();
+      const msgBox = document.getElementById("pinMessage");
+
+      if (!oldPin || !newPin) {
+        msgBox.innerText = "❌ Please enter both old and new PIN.";
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("ac_number", user.ac_number);
+      formData.append("old_pin", oldPin);
+      formData.append("new_pin", newPin);
+
+      const res = await fetch("/change-pin", { method: "POST", body: formData });
+      const msg = await res.text();
+      msgBox.innerText = msg;
+
+      setTimeout(() => {
+        msgBox.innerText = "";
+        document.getElementById("oldPinInput").value = "";
+        document.getElementById("newPinInput").value = "";
+      }, 4000);
+    }
+
+    function logout() {
+      sessionStorage.clear();
+      window.location.href = "/";
+    }
+  </script>
+</body>
+</html>

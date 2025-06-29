@@ -1,0 +1,136 @@
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #f1f4f9;
+  margin: 0;
+  padding: 0;
+  color: #333;
+}
+
+h1, h2, h3 {
+  text-align: center;
+  color: #2c3e50;
+}
+
+.form-container, .dashboard {
+  max-width: 500px;
+  height: auto;
+  margin: 50px auto;
+  background: #ffffff;
+  padding: 30px 40px;
+  border-radius: 10px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+ 
+}
+
+input[type="text"], input[type="password"], input[type="number"], input[type="date"] {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  margin-bottom: 20px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 16px;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  background-color: #3498db;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+button:hover {
+  background-color: #2980b9;
+}
+
+.role-select {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: center; /* Optional: center buttons horizontally */
+}
+
+
+.role-select button {
+  flex: 1;
+}
+
+.hidden {
+  display: none;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+ul li {
+  background-color: #ecf0f1;
+  padding: 10px;
+  margin-bottom: 5px;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.section {
+  margin-top: 20px;
+}
+
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #f1f4f9;
+  position: relative;
+  z-index: 1;
+}
+
+/* Full-page background image with low opacity */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-image: url("/static/BANK.IMG.png");
+  background-size: cover;       /* 🔁 Fills entire screen */
+  background-repeat: no-repeat;
+  background-position: center;
+  opacity: 0.09;                /* 🎯 Faded effect */
+  z-index: -1;
+}
+
+/* Transparent box style */
+.form-container, .dashboard, .section {
+  background: rgba(255, 255, 255, 0.0);  /* Fully transparent */
+  box-shadow: none;                      /* Remove shadow */
+  border: 1px solid rgba(255, 255, 255, 0.1); /* Optional: light border */
+  padding: 30px 40px;
+  border-radius: 10px;
+  max-width: 500px;
+  margin: 30px auto;
+}
+
+/* If you want a slightly frosted effect instead of full transparency: */
+
+.form-container, .dashboard, .section {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(3px);
+  box-shadow: 0 0 10px rgba(0,0,0,0.04);
+}
+
+

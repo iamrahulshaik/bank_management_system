@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Register</title>
+    <link rel="stylesheet" href="/static/style.css" />
+    <style>
+      body {
+        margin: 0;
+        font-family: "Segoe UI", sans-serif;
+        position: relative;
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url("/static/BANK.IMG.png") no-repeat center center fixed;
+        background-size: cover;
+        opacity: 0.2;
+        z-index: -1;
+      }
+
+      .form-container {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(4px);
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 40px;
+        border-radius: 12px;
+        max-width: 600px;
+        margin: 60px auto;
+        color: white;
+      }
+
+      .form-container h2 {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+
+      form {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      input,
+      select {
+        font-size: 18px;
+        padding: 14px;
+        border-radius: 8px;
+        border: none;
+        outline: none;
+      }
+
+      button {
+        padding: 14px;
+        font-size: 18px;
+        background-color: #3498db;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background-color: #2980b9;
+      }
+
+      #registerMessage {
+        margin-top: 20px;
+        text-align: center;
+        font-weight: bold;
+        color: #000000;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="form-container">
+      <h2>Register</h2>
+      <form id="registerForm">
+        <input name="name" placeholder="Full Name" required />
+        <select name="ac_type">
+          <option value="Saving">Saving</option>
+          <option value="Current">Current</option>
+        </select>
+        <input
+          name="contact"
+          id="contactInput"
+          placeholder="Contact Number"
+          required
+          maxlength="10"
+        />
+        <input name="location" placeholder="Location" required />
+        <input name="pin" placeholder="PIN" type="password" required />
+        <button type="submit">Register</button>
+      </form>
+      <div id="registerMessage"></div>
+    </div>
+
+    <script>
+      const form = document.getElementById("registerForm");
+
+      form.onsubmit = async (e) => {
+        e.preventDefault();
+        const contact = document.getElementById("contactInput").value;
+        const msgBox = document.getElementById("registerMessage");
+
+        // Validate 10-digit contact number
+        if (!/^\d{10}$/.test(contact)) {
+          msgBox.innerText = "❌ Contact number must be exactly 10 digits.";
+          msgBox.style.color = "red";
+          clearMessageAfterDelay();
+          return;
+        }
+
+        const formData = new FormData(form);
+        const res = await fetch("/register", {
+          method: "POST",
+          body: formData,
+        });
+
+        const msg = await res.text();
+        msgBox.innerText = msg;
+        msgBox.style.color = res.ok ? "green" : "red";
+
+        if (res.ok) {
+          form.reset(); // ✅ Clear the form after successful registration
+        }
+
+        clearMessageAfterDelay();
+      };
+
+      // Clear message after 4 seconds
+      function clearMessageAfterDelay() {
+        setTimeout(() => {
+          document.getElementById("registerMessage").innerText = "";
+        }, 4000);
+      }
+    </script>
+  </body>
+</html>

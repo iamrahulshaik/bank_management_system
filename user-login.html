@@ -1,0 +1,41 @@
+<!-- templates/user-login.html -->
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>User Login</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <div class="form-container">
+      <h2>👤 User Login</h2>
+      <form id="userLoginForm">
+        <input
+          type="text"
+          name="ac_number"
+          placeholder="Account Number"
+          required
+        />
+        <input type="password" name="pin" placeholder="PIN" required />
+        <button type="submit">Login</button>
+        <p>Don't have an account? <a href="/register-page">Register</a></p>
+      </form>
+      <div id="userLoginMessage"></div>
+    </div>
+    <script>
+      const form = document.getElementById("userLoginForm");
+      form.onsubmit = async (e) => {
+        e.preventDefault();
+        const formData = new FormData(form);
+        const res = await fetch("/login", { method: "POST", body: formData });
+        const data = await res.json();
+        if (data.status === "success") {
+          sessionStorage.setItem("user", JSON.stringify(data.data));
+
+          window.location.href = "/user-dashboard";
+        } else {
+          document.getElementById("userLoginMessage").innerText = data.message;
+        }
+      };
+    </script>
+  </body>
+</html>
